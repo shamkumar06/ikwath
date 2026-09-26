@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../services/ikwath_controller.dart';
+import '../../services/locale_provider.dart';
+import '../../l10n/app_strings.dart';
 import '../../theme/app_theme.dart';
 import '../../models/telemetry.dart';
 import '../widgets/vessel_diagram.dart';
@@ -18,6 +20,7 @@ class TelemetryView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ctrl = context.watch<IKwathController>();
+    final lp = context.watch<LocaleProvider>();
     final t = ctrl.telemetry;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -37,9 +40,9 @@ class TelemetryView extends StatelessWidget {
           const SizedBox(height: 22),
 
           // ── 3. Sensor Card Grid Section Header ────────────────────────
-          const _SectionHeader(
-            title: 'संवेदक ग्रिड • Real-Time Sensor Telemetry',
-            subtitle: '6 calibrated sensors • ESP32 BLE Hardware Stream • 1 Hz sampling',
+          _SectionHeader(
+            title: lp.t(S.sensorGrid),
+            subtitle: lp.t(S.sensorGridSub),
           ),
           const SizedBox(height: 16),
 
@@ -61,12 +64,12 @@ class TelemetryView extends StatelessWidget {
                 children: [
                   // 1. Decoction Temperature (PT100 RTD)
                   SensorCard(
-                    title: 'तापमान • Decoction Temp',
+                    title: lp.t(S.decocTemp),
                     subtitle: 'PT100 RTD + MAX31865 (Class A)',
                     value: t.tempC.toStringAsFixed(1),
                     unit: '°C',
-                    rangeLabel: 'लक्ष्य PID: ${t.tempSetpointC.toStringAsFixed(1)}°C (Band: 85–90°C)',
-                    tag: t.isPidLocked ? 'PID LOCKED' : 'PID REGULATING',
+                    rangeLabel: '${lp.t(S.target)} PID: ${t.tempSetpointC.toStringAsFixed(1)}°C (85–90°C)',
+                    tag: t.isPidLocked ? lp.t(S.pidLocked).toUpperCase() : lp.t(S.pidRegulating).toUpperCase(),
                     progress: (t.tempC / 100).clamp(0, 1),
                     statusColor: _tempColor(t),
                     icon: Icons.thermostat_rounded,
@@ -77,30 +80,30 @@ class TelemetryView extends StatelessWidget {
 
                   // 2. Mass / Reduction (HX711 Load Cell)
                   SensorCard(
-                    title: 'द्रव्यमान • Mass Reduction',
+                    title: lp.t(S.massReduction),
                     subtitle: 'HX711 Load Cell (AFI 1/4th Endpoint)',
                     value: t.massG.toStringAsFixed(1),
                     unit: 'g',
                     rangeLabel:
-                        'आरंभ: ${t.initMassG.toStringAsFixed(0)}g → लक्ष्य: ${t.targetMassG.toStringAsFixed(0)}g',
-                    tag: '${t.percentToGo}% TO GO',
+                        '${t.initMassG.toStringAsFixed(0)}g → ${lp.t(S.target)}: ${t.targetMassG.toStringAsFixed(0)}g',
+                    tag: '${t.percentToGo}% ${lp.t(S.toGo).toUpperCase()}',
                     progress: t.reductionProgress,
                     statusColor: AppTheme.primary,
                     icon: Icons.scale_rounded,
-                    actionLabel: 'Tare Zero (शून्य)',
+                    actionLabel: 'Tare Zero',
                     onAction: () {},
-                    extraLabel: 'वाष्पीकरण: ${t.evapRateGpm.toStringAsFixed(1)} g/m',
+                    extraLabel: '${lp.t(S.evapRate)}: ${t.evapRateGpm.toStringAsFixed(1)} g/m',
                     illustrationAsset: 'assets/images/sensor_mass.jpg',
                   ),
 
                   // 3. Magnetic Stirrer (Hall Effect)
                   SensorCard(
-                    title: 'मंथक • Magnetic Stirrer',
-                    subtitle: 'Hall Effect Driver (यवाकूट Agitation)',
+                    title: lp.t(S.magneticStirrer),
+                    subtitle: 'Hall Effect Driver',
                     value: '${t.stirrerRpm}',
                     unit: 'RPM',
                     rangeLabel: 'Uniform Active Decoction',
-                    tag: 'सक्रिय • ACTIVE',
+                    tag: '${lp.t(S.active).toUpperCase()}',
                     progress: (t.stirrerRpm / 600).clamp(0, 1),
                     statusColor: AppTheme.green,
                     icon: Icons.rotate_right_rounded,
@@ -111,12 +114,12 @@ class TelemetryView extends StatelessWidget {
 
                   // 4. Optical Yield / Turbidity (IR Nephelometric)
                   SensorCard(
-                    title: 'निष्कर्षण • Optical Turbidity',
+                    title: lp.t(S.opticalTurbidity),
                     subtitle: 'IR Nephelometric (Yield Index)',
                     value: t.turbidityNtu.toStringAsFixed(1),
                     unit: 'NTU',
-                    rangeLabel: 'AFI मानक निष्कर्षण: > 60 NTU',
-                    tag: t.turbidityNtu >= 60 ? 'इष्टतम • OPTIMAL' : 'EXTRACTING',
+                    rangeLabel: 'AFI > 60 NTU',
+                    tag: t.turbidityNtu >= 60 ? lp.t(S.optimal).toUpperCase() : lp.t(S.extracting).toUpperCase(),
                     progress: (t.turbidityNtu / 100).clamp(0, 1),
                     statusColor: AppTheme.ayushBlue,
                     icon: Icons.opacity_rounded,
@@ -127,12 +130,12 @@ class TelemetryView extends StatelessWidget {
 
                   // 5. Anti-Boilover Meniscus Clearance
                   SensorCard(
-                    title: 'क्वथन रक्षक • Boilover Meniscus',
+                    title: lp.t(S.boiloverMeniscus),
                     subtitle: 'IR / Ultrasonic Headspace Sensor',
                     value: t.boiloverMm.toStringAsFixed(1),
                     unit: 'mm',
-                    rangeLabel: 'न्यूनतम सुरक्षा अंतर: > 25 mm',
-                    tag: t.isBoiloverSafe ? 'सुरक्षित • SAFE' : 'सचेत • ALERT',
+                    rangeLabel: '> 25 mm',
+                    tag: t.isBoiloverSafe ? lp.t(S.safe).toUpperCase() : lp.t(S.alertStatus).toUpperCase(),
                     progress: (t.boiloverMm / 60).clamp(0, 1),
                     statusColor: t.isBoiloverSafe ? AppTheme.green : AppTheme.red,
                     icon: Icons.waves_rounded,
@@ -143,18 +146,18 @@ class TelemetryView extends StatelessWidget {
 
                   // 6. SSR Heater Power (Zero-Crossing PWM)
                   SensorCard(
-                    title: 'ऊष्मक निर्गम • SSR Heater Output',
+                    title: lp.t(S.ssrHeaterOutput),
                     subtitle: 'Zero-Crossing PWM Power Control',
                     value: '${t.ssrDutyCycle}',
                     unit: '%',
-                    rangeLabel: '${t.powerWatts}W of 750W Max Firing',
-                    tag: t.ssrDutyCycle > 0 ? 'सक्रिय • FIRING' : 'IDLE',
+                    rangeLabel: '${t.powerWatts}W / 750W Max',
+                    tag: t.ssrDutyCycle > 0 ? lp.t(S.firing).toUpperCase() : lp.t(S.idle).toUpperCase(),
                     progress: (t.ssrDutyCycle / 100).clamp(0, 1),
                     statusColor: AppTheme.primaryDark,
                     icon: Icons.bolt_rounded,
                     actionLabel: 'SSR Diagnostics',
                     onAction: () {},
-                    extraLabel: '${t.powerWatts}W Firing',
+                    extraLabel: '${t.powerWatts}W ${lp.t(S.firing)}',
                     illustrationAsset: 'assets/images/sensor_temp.jpg',
                   ),
                 ],
@@ -181,6 +184,7 @@ class _AyushVesselHeroCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = ctrl.telemetry;
     final f = ctrl.formulation;
+    final lp = context.watch<LocaleProvider>();
     final borderColor = isDark ? AppTheme.borderDark : AppTheme.borderLight;
 
     return Container(
@@ -273,7 +277,7 @@ class _AyushVesselHeroCard extends StatelessWidget {
                       ),
                       onPressed: ctrl.togglePause,
                       icon: Icon(ctrl.isPaused ? Icons.play_arrow_rounded : Icons.pause_rounded, size: 18),
-                      label: Text(ctrl.isPaused ? 'Resume' : 'Pause'),
+                      label: Text(ctrl.isPaused ? lp.t(S.resume) : lp.t(S.pause)),
                     ),
                   ],
                 ),
@@ -288,7 +292,7 @@ class _AyushVesselHeroCard extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'AFI 1/4th Mass Reduction (अपचयन प्रगति)',
+                          lp.t(S.massReductionProgress),
                           style: GoogleFonts.inter(
                             fontSize: 12.5,
                             fontWeight: FontWeight.w700,
@@ -296,7 +300,7 @@ class _AyushVesselHeroCard extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          '${(t.reductionProgress * 100).toStringAsFixed(1)}% पूर्ण • शेष: ${t.massG.toStringAsFixed(1)}g / लक्ष्य: ${t.targetMassG.toStringAsFixed(0)}g',
+                          '${(t.reductionProgress * 100).toStringAsFixed(1)}% ${lp.t(S.complete)} • ${lp.t(S.toGo).toUpperCase()}: ${t.massG.toStringAsFixed(1)}g / ${lp.t(S.target)}: ${t.targetMassG.toStringAsFixed(0)}g',
                           style: GoogleFonts.inter(
                             fontSize: 12.5,
                             fontWeight: FontWeight.w800,
@@ -335,29 +339,29 @@ class _AyushVesselHeroCard extends StatelessWidget {
                   child: Row(
                     children: [
                       _StatTile(
-                        label: 'PID अवस्था',
-                        val: t.isPidLocked ? 'PID Locked' : 'Regulating',
+                        label: lp.t(S.pidState),
+                        val: t.isPidLocked ? lp.t(S.pidLocked) : lp.t(S.pidRegulating),
                         color: t.isPidLocked ? AppTheme.green : AppTheme.amber,
                         icon: Icons.lock_clock_rounded,
                       ),
                       _Divider(isDark: isDark),
                       _StatTile(
-                        label: 'वाष्पीकरण दर',
+                        label: lp.t(S.evapRate),
                         val: '${t.evapRateGpm.toStringAsFixed(1)} g/min',
                         color: AppTheme.ayushBlue,
                         icon: Icons.speed_rounded,
                       ),
                       _Divider(isDark: isDark),
                       _StatTile(
-                        label: 'अनुमानित समय (ETA)',
+                        label: lp.t(S.eta),
                         val: '${(t.etaSec / 60).floor()}m ${t.etaSec % 60}s',
                         color: AppTheme.primary,
                         icon: Icons.timer_outlined,
                       ),
                       _Divider(isDark: isDark),
                       _StatTile(
-                        label: 'क्वथन सुरक्षा',
-                        val: t.isBoiloverSafe ? 'Safe Meniscus' : 'Warning',
+                        label: lp.t(S.boilSafety),
+                        val: t.isBoiloverSafe ? lp.t(S.safeMeniscus) : lp.t(S.warning),
                         color: t.isBoiloverSafe ? AppTheme.green : AppTheme.red,
                         icon: Icons.shield_rounded,
                       ),

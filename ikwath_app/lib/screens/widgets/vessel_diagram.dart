@@ -382,15 +382,12 @@ class _VesselPainter extends CustomPainter {
     path.lineTo(left, liquidTop);
 
     // Animated wave surface
-    if (isHeating) {
-      for (double x = left; x <= right; x++) {
-        final progress = (x - left) / (right - left);
-        final wave1 = 6.0 * math.sin(progress * 2 * math.pi + wavePhase * 2 * math.pi);
-        final wave2 = 3.0 * math.cos(progress * 3 * math.pi - wavePhase * 4 * math.pi);
-        path.lineTo(x, liquidTop + wave1 + wave2);
-      }
-    } else {
-      path.lineTo(right, liquidTop);
+    final waveAmplitude = isHeating ? 6.0 : 3.0; // Smaller wave if not heating but stirrer active
+    for (double x = left; x <= right; x++) {
+      final progress = (x - left) / (right - left);
+      final wave1 = waveAmplitude * math.sin(progress * 2 * math.pi + wavePhase * 2 * math.pi);
+      final wave2 = (waveAmplitude / 2) * math.cos(progress * 3 * math.pi - wavePhase * 4 * math.pi);
+      path.lineTo(x, liquidTop + wave1 + wave2);
     }
 
     path.lineTo(right, bottom);

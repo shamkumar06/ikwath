@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import '../../services/ikwath_controller.dart';
+import '../../services/locale_provider.dart';
+import '../../l10n/app_strings.dart';
 import '../../theme/app_theme.dart';
 import 'ble_pill.dart';
 
 /// Official Ministry of Ayush (Government of India) Header Component
 /// Replicates the authentic government portal header (ayush.gov.in) with:
 /// 1. Indian National Tricolour micro-ribbon
-/// 2. State Emblem of India + "भारत सरकार / आयुष मंत्रालय"
-/// 3. Hindi/English dual-language branding & quick formulation search
+/// 2. State Emblem of India + "भारत सरकार / आयुष मंत्रालय" (localized)
+/// 3. 12-language selector (NLP-ready)
 /// 4. Iconic Ministry Royal Blue (`#0B4F9C`) sub-navigation bar
 class AyushHeader extends StatelessWidget {
   final int selectedIndex;
@@ -30,17 +33,19 @@ class AyushHeader extends StatelessWidget {
     required this.onSettings,
   });
 
-  static const List<({String hindi, String english, IconData icon})> navTabs = [
-    (hindi: 'टेलीमेट्री', english: 'Telemetry', icon: Icons.sensors_rounded),
-    (hindi: 'निर्माण प्रक्रिया', english: 'Kwatha Process', icon: Icons.local_fire_department_rounded),
-    (hindi: 'निष्कर्षण चार्ट', english: 'Extraction Charts', icon: Icons.show_chart_rounded),
-    (hindi: 'आयुष पॉड संग्रह', english: 'AFI Pod Library', icon: Icons.science_rounded),
-    (hindi: 'गुणवत्ता ऑडिट', english: 'Audit & Compliance', icon: Icons.verified_rounded),
+  /// Tab keys (used to look up translations)
+  static const List<({String key, IconData icon})> navTabKeys = [
+    (key: S.tabTelemetry,     icon: Icons.sensors_rounded),
+    (key: S.tabKwathaProcess, icon: Icons.local_fire_department_rounded),
+    (key: S.tabExtraction,    icon: Icons.show_chart_rounded),
+    (key: S.tabPodLibrary,    icon: Icons.science_rounded),
+    (key: S.tabAudit,         icon: Icons.verified_rounded),
   ];
 
   @override
   Widget build(BuildContext context) {
     final borderColor = isDark ? AppTheme.borderDark : AppTheme.borderLight;
+    final lp = context.watch<LocaleProvider>();
 
     return Container(
       decoration: BoxDecoration(
@@ -69,9 +74,9 @@ class AyushHeader extends StatelessWidget {
             ),
           ),
 
-          // ── 2. Official Portal Header Bar ──────────────────────────────
+          // ── 2. Official Portal Header Bar (FIXED SPACING) ──────────────
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             child: LayoutBuilder(
               builder: (context, constraints) {
                 final isWide = constraints.maxWidth > 920;
@@ -80,9 +85,9 @@ class AyushHeader extends StatelessWidget {
                 return Row(
                   children: [
                     // State Emblem & Ministry Identity
-                    const _AyushEmblemBrand(),
+                    _AyushEmblemBrand(lp: lp),
 
-                    const SizedBox(width: 14),
+                    const SizedBox(width: 18),
 
                     // Center Search Bar (like ayush.gov.in)
                     if (isWide) ...[
@@ -90,7 +95,7 @@ class AyushHeader extends StatelessWidget {
                         child: Center(
                           child: ConstrainedBox(
                             constraints: const BoxConstraints(maxWidth: 440),
-                            child: _AyushSearchBar(ctrl: ctrl),
+                            child: _AyushSearchBar(ctrl: ctrl, lp: lp),
                           ),
                         ),
                       ),
@@ -98,31 +103,14 @@ class AyushHeader extends StatelessWidget {
                       const Spacer(),
                     ],
 
-                    // Right Actions (Pills, Emergency, Alerts, Theme)
+                    // Right Actions
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        // Hindi/English Badge
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: isDark ? AppTheme.borderDark : AppTheme.ayushBlueLight,
-                            borderRadius: BorderRadius.circular(6),
-                            border: Border.all(
-                              color: isDark ? AppTheme.borderDark : AppTheme.ayushBlueBorder,
-                            ),
-                          ),
-                          child: Text(
-                            'अA',
-                            style: GoogleFonts.inter(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                              color: isDark ? Colors.white : AppTheme.ayushBlue,
-                            ),
-                          ),
-                        ),
+                        // ── Language Selector (replaces old अA badge) ──
+                        _LanguageSelectorButton(isDark: isDark),
 
-                        const SizedBox(width: 8),
+                        const SizedBox(width: 10),
 
                         // BLE Connection Status Pill
                         BlePill(
@@ -131,47 +119,47 @@ class AyushHeader extends StatelessWidget {
                         ),
 
                         if (isMedium) ...[
-                          const SizedBox(width: 8),
+                          const SizedBox(width: 10),
                           // Machine State Badge
                           StateBadge(stage: ctrl.stage),
                         ],
 
-                        const SizedBox(width: 8),
+                        const SizedBox(width: 10),
 
                         // Emergency Cutoff Button
                         _ActionIconBtn(
                           icon: Icons.power_off_rounded,
                           color: AppTheme.red,
-                          tooltip: 'Emergency Hardware Cutoff (230V SSR)',
-                          onTap: () => _confirmCutoff(context),
+                          tooltip: lp.t(S.emergencyCutoff),
+                          onTap: () => _confirmCutoff(context, lp),
                         ),
 
-                        const SizedBox(width: 6),
+                        const SizedBox(width: 8),
 
                         // Alerts Button with badge
                         _ActionIconBtn(
                           icon: Icons.notifications_rounded,
                           color: ctrl.alertCount > 0 ? AppTheme.red : null,
                           badge: ctrl.alertCount > 0 ? ctrl.alertCount : null,
-                          tooltip: 'System Alerts & Safety Monitor',
+                          tooltip: lp.t(S.alerts),
                           onTap: onAlerts,
                         ),
 
-                        const SizedBox(width: 6),
+                        const SizedBox(width: 8),
 
                         // Settings Button
                         _ActionIconBtn(
                           icon: Icons.tune_rounded,
-                          tooltip: 'Calibration & Settings',
+                          tooltip: lp.t(S.settings),
                           onTap: onSettings,
                         ),
 
-                        const SizedBox(width: 6),
+                        const SizedBox(width: 8),
 
                         // Theme Mode Toggle
                         _ActionIconBtn(
                           icon: isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
-                          tooltip: isDark ? 'Switch to Ayush Light Mode' : 'Switch to Ayush Dark Mode',
+                          tooltip: isDark ? 'Light Mode' : 'Dark Mode',
                           onTap: onToggleTheme,
                         ),
                       ],
@@ -182,7 +170,7 @@ class AyushHeader extends StatelessWidget {
             ),
           ),
 
-          // ── 3. Iconic Ministry Royal Blue Sub-Nav Bar (ayush.gov.in) ────
+          // ── 3. Iconic Ministry Royal Blue Sub-Nav Bar (FIXED SPACING) ──
           Container(
             width: double.infinity,
             decoration: BoxDecoration(
@@ -201,18 +189,19 @@ class AyushHeader extends StatelessWidget {
             ),
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Row(
-                children: List.generate(navTabs.length, (idx) {
+                children: List.generate(navTabKeys.length, (idx) {
                   final isSelected = selectedIndex == idx;
-                  final item = navTabs[idx];
+                  final item = navTabKeys[idx];
+                  final label = lp.t(item.key);
 
                   return InkWell(
                     onTap: () => onTabSelected(idx),
                     hoverColor: Colors.white.withValues(alpha: 0.08),
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 200),
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                       decoration: BoxDecoration(
                         color: isSelected
                             ? Colors.white.withValues(alpha: 0.14)
@@ -234,34 +223,17 @@ class AyushHeader extends StatelessWidget {
                                 ? Colors.white
                                 : Colors.white.withValues(alpha: 0.8),
                           ),
-                          const SizedBox(width: 8),
-                          // Dual Language Label (Hindi + English)
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                item.hindi,
-                                style: GoogleFonts.inter(
-                                  fontSize: 12,
-                                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                                  color: Colors.white,
-                                  height: 1.1,
-                                ),
-                              ),
-                              Text(
-                                item.english.toUpperCase(),
-                                style: GoogleFonts.inter(
-                                  fontSize: 9,
-                                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                                  color: isSelected
-                                      ? const Color(0xFFFFD180)
-                                      : Colors.white.withValues(alpha: 0.7),
-                                  letterSpacing: 0.5,
-                                  height: 1.1,
-                                ),
-                              ),
-                            ],
+                          const SizedBox(width: 10),
+                          Text(
+                            label,
+                            style: GoogleFonts.inter(
+                              fontSize: 13,
+                              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                              color: isSelected
+                                  ? Colors.white
+                                  : Colors.white.withValues(alpha: 0.85),
+                              letterSpacing: 0.2,
+                            ),
                           ),
                         ],
                       ),
@@ -276,7 +248,7 @@ class AyushHeader extends StatelessWidget {
     );
   }
 
-  void _confirmCutoff(BuildContext context) {
+  void _confirmCutoff(BuildContext context, LocaleProvider lp) {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
@@ -285,18 +257,16 @@ class AyushHeader extends StatelessWidget {
             const Icon(Icons.warning_amber_rounded, color: AppTheme.red, size: 28),
             const SizedBox(width: 10),
             Text(
-              'Emergency Hardware Cutoff',
+              lp.t(S.emergencyCutoff),
               style: GoogleFonts.inter(fontWeight: FontWeight.w700),
             ),
           ],
         ),
-        content: const Text(
-          'This initiates an immediate emergency hardware cut: 230V SSR heater disconnects, magnetic stirrer stops, and ESP32 transitions to SAFE state. Proceed?',
-        ),
+        content: Text(lp.t(S.emergencyBody)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(lp.t(S.cancel)),
           ),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: AppTheme.red),
@@ -304,7 +274,7 @@ class AyushHeader extends StatelessWidget {
               Navigator.pop(context);
               ctrl.triggerEmergencyCutoff();
             },
-            child: const Text('Cutoff Now'),
+            child: Text(lp.t(S.cutoffNow)),
           ),
         ],
       ),
@@ -312,9 +282,110 @@ class AyushHeader extends StatelessWidget {
   }
 }
 
+// ── Language Selector Button ─────────────────────────────────────────────────
+class _LanguageSelectorButton extends StatelessWidget {
+  final bool isDark;
+  const _LanguageSelectorButton({required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    final lp = context.watch<LocaleProvider>();
+    final currentLocale = lp.currentLocale;
+
+    return PopupMenuButton<String>(
+      onSelected: (code) => lp.setLanguage(code),
+      tooltip: lp.t(S.selectLanguage),
+      position: PopupMenuPosition.under,
+      constraints: const BoxConstraints(minWidth: 220, maxWidth: 280),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      color: isDark ? const Color(0xFF142042) : Colors.white,
+      offset: const Offset(0, 8),
+      itemBuilder: (_) => supportedLocales.map((locale) {
+        final isActive = locale.code == lp.langCode;
+        return PopupMenuItem<String>(
+          value: locale.code,
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: Row(
+              children: [
+                // Active indicator dot
+                Container(
+                  width: 8,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: isActive ? AppTheme.green : Colors.transparent,
+                    border: Border.all(
+                      color: isActive ? AppTheme.green : (isDark ? AppTheme.borderDark : AppTheme.borderLight),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                // Native name
+                Expanded(
+                  child: Text(
+                    locale.name,
+                    style: GoogleFonts.inter(
+                      fontSize: 13,
+                      fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+                      color: isActive
+                          ? (isDark ? Colors.white : AppTheme.ayushBlue)
+                          : (isDark ? Colors.white70 : Colors.black87),
+                    ),
+                  ),
+                ),
+                // English name
+                Text(
+                  locale.englishName,
+                  style: GoogleFonts.inter(
+                    fontSize: 11,
+                    color: isDark ? AppTheme.textMutedDark : AppTheme.textMutedLight,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }).toList(),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: isDark ? AppTheme.borderDark : AppTheme.ayushBlueLight,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: isDark ? AppTheme.borderDark : AppTheme.ayushBlueBorder,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.translate_rounded, size: 14, color: AppTheme.ayushBlue),
+            const SizedBox(width: 6),
+            Text(
+              currentLocale.name,
+              style: GoogleFonts.inter(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: isDark ? Colors.white : AppTheme.ayushBlue,
+              ),
+            ),
+            const SizedBox(width: 4),
+            Icon(
+              Icons.keyboard_arrow_down_rounded,
+              size: 16,
+              color: isDark ? Colors.white70 : AppTheme.ayushBlue,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 // ── Ministry of Ayush National Emblem & Brand Logo ───────────────────────────
 class _AyushEmblemBrand extends StatelessWidget {
-  const _AyushEmblemBrand();
+  final LocaleProvider lp;
+  const _AyushEmblemBrand({required this.lp});
 
   @override
   Widget build(BuildContext context) {
@@ -343,9 +414,9 @@ class _AyushEmblemBrand extends StatelessWidget {
           ),
         ),
 
-        const SizedBox(width: 10),
+        const SizedBox(width: 12),
 
-        // Official Dual-Language Titles
+        // Official Dual-Language Titles (now localized)
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
@@ -354,7 +425,7 @@ class _AyushEmblemBrand extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'भारत सरकार',
+                  lp.t(S.govOfIndia),
                   style: GoogleFonts.inter(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
@@ -369,7 +440,7 @@ class _AyushEmblemBrand extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  'आयुष मंत्रालय',
+                  lp.t(S.ministryOfAyush),
                   style: GoogleFonts.inter(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
@@ -379,6 +450,7 @@ class _AyushEmblemBrand extends StatelessWidget {
                 ),
               ],
             ),
+            const SizedBox(height: 3),
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -391,7 +463,7 @@ class _AyushEmblemBrand extends StatelessWidget {
                     letterSpacing: -0.3,
                   ),
                 ),
-                const SizedBox(width: 6),
+                const SizedBox(width: 8),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
                   decoration: BoxDecoration(
@@ -409,7 +481,7 @@ class _AyushEmblemBrand extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(width: 4),
+                const SizedBox(width: 6),
                 Text(
                   'SIH 2026',
                   style: GoogleFonts.inter(
@@ -430,14 +502,15 @@ class _AyushEmblemBrand extends StatelessWidget {
 // ── Ayush Search Bar Component (Inspired by ayush.gov.in) ─────────────────────
 class _AyushSearchBar extends StatelessWidget {
   final IKwathController ctrl;
-  const _AyushSearchBar({required this.ctrl});
+  final LocaleProvider lp;
+  const _AyushSearchBar({required this.ctrl, required this.lp});
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
-      height: 38,
+      height: 40,
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF0F1A38) : const Color(0xFFF8FAFC),
         borderRadius: BorderRadius.circular(8),
@@ -447,16 +520,16 @@ class _AyushSearchBar extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const SizedBox(width: 10),
+          const SizedBox(width: 12),
           Icon(
             Icons.eco_rounded,
             size: 16,
             color: AppTheme.green,
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 10),
           Expanded(
             child: Text(
-              'AFI क्वाथ खोजें: ${ctrl.formulation.name} (${ctrl.formulation.sanskritName})',
+              '${lp.t(S.searchPlaceholder)} ${ctrl.formulation.name}',
               style: GoogleFonts.inter(
                 fontSize: 12,
                 color: isDark ? AppTheme.textMutedDark : const Color(0xFF475569),
@@ -467,7 +540,7 @@ class _AyushSearchBar extends StatelessWidget {
           ),
           // Mic icon
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 6),
+            padding: const EdgeInsets.symmetric(horizontal: 8),
             child: Icon(
               Icons.mic_none_rounded,
               size: 17,
@@ -476,7 +549,7 @@ class _AyushSearchBar extends StatelessWidget {
           ),
           // Search Blue Button
           Container(
-            height: 38,
+            height: 40,
             width: 42,
             decoration: const BoxDecoration(
               color: AppTheme.ayushBlue,

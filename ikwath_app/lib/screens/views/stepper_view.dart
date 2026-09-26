@@ -2,64 +2,66 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../services/ikwath_controller.dart';
+import '../../services/locale_provider.dart';
+import '../../l10n/app_strings.dart';
 import '../../theme/app_theme.dart';
 
 class StepperView extends StatelessWidget {
   const StepperView({super.key});
 
-  static const _steps = [
-    _StepInfo(
-      icon: Icons.grass_rounded,
-      title: 'Scan Botanical Profile',
-      subtitle: 'Herbal Formulation (यवाकूट चूर्ण Yavakūṭa Cūrṇa)',
-      detail:
-          'Optical scanner reads the standardized herbal pod and auto-loads Ayurvedic extraction parameters: water proportion, temp 85–90°C, and target 1/4th mass reduction endpoint.',
-      param1: 'Pod: AFI Compliant',
-      param2: 'Mesh: #10/40 Coarse',
-    ),
-    _StepInfo(
-      icon: Icons.water_drop_rounded,
-      title: 'Add Water & Initialize',
-      subtitle: 'Sensors & Fluid Dynamics (द्रव्यमान शून्यीकरण)',
-      detail:
-          'ESP32 tares the load cell to zero, validates temperature probe, arms boilover sensor, activates food-grade magnetic stirrer, and starts adding water.',
-      param1: 'Liquid: Tared Zero',
-      param2: 'Stirrer: Armed & Calibrated',
-    ),
-    _StepInfo(
-      icon: Icons.local_fire_department_rounded,
-      title: 'Heat & Decoction',
-      subtitle: 'PID Thermal Control (85–90°C क्वथन)',
-      detail:
-          'Induction heater dynamically adjusts power to maintain decoction temperature strictly within the 85–90°C AFI band for optimal active principle extraction.',
-      param1: 'Setpoint: 88.0°C',
-      param2: 'Tolerance: ±1.5°C Locked',
-    ),
-    _StepInfo(
-      icon: Icons.bubble_chart_rounded,
-      title: 'Mass Reduction',
-      subtitle: 'Continuous 1/4th Evaporation (चतुर्थांश अपचयन)',
-      detail:
-          'Load cell continuously streams decoction mass. Process stops automatically the moment mass reaches exactly 25% of initial weight (Chaturthamsha Avashesha).',
-      param1: 'Endpoint: 1/4th Target',
-      param2: 'Rate: ~18 g/min',
-    ),
-    _StepInfo(
-      icon: Icons.verified_rounded,
-      title: 'Kwath Ready!',
-      subtitle: 'Auto-Stop & Quality Verification (सिद्ध क्वाथ)',
-      detail:
-          'Machine auto-stops at the 1/4th endpoint. Optical sensor confirms extractive concentration yield. Ready for serving or dispensing.',
-      param1: 'Turbidity: Optimal Yield',
-      param2: 'AFI: Gold Standard',
-    ),
-  ];
+  List<_StepInfo> _buildSteps(LocaleProvider lp) {
+    return [
+      _StepInfo(
+        icon: Icons.grass_rounded,
+        title: lp.t(S.scanBotanical),
+        subtitle: 'Herbal Formulation (यवाकूट चूर्ण)',
+        detail: 'Optical scanner reads the standardized herbal pod and auto-loads Ayurvedic extraction parameters: water proportion, temp 85–90°C, and target 1/4th mass reduction endpoint.',
+        param1: 'Pod: AFI Compliant',
+        param2: 'Mesh: #10/40 Coarse',
+      ),
+      _StepInfo(
+        icon: Icons.water_drop_rounded,
+        title: lp.t(S.addWater),
+        subtitle: 'Sensors & Fluid Dynamics',
+        detail: 'ESP32 tares the load cell to zero, validates temperature probe, arms boilover sensor, activates food-grade magnetic stirrer, and starts adding water.',
+        param1: 'Liquid: Tared Zero',
+        param2: 'Stirrer: Armed & Calibrated',
+      ),
+      _StepInfo(
+        icon: Icons.local_fire_department_rounded,
+        title: lp.t(S.heatDecoction),
+        subtitle: 'PID Thermal Control (85–90°C)',
+        detail: 'Induction heater dynamically adjusts power to maintain decoction temperature strictly within the 85–90°C AFI band for optimal active principle extraction.',
+        param1: 'Setpoint: 88.0°C',
+        param2: 'Tolerance: ±1.5°C Locked',
+      ),
+      _StepInfo(
+        icon: Icons.bubble_chart_rounded,
+        title: lp.t(S.massReductionStep),
+        subtitle: 'Continuous 1/4th Evaporation',
+        detail: 'Load cell continuously streams decoction mass. Process stops automatically the moment mass reaches exactly 25% of initial weight (Chaturthamsha Avashesha).',
+        param1: 'Endpoint: 1/4th Target',
+        param2: 'Rate: ~18 g/min',
+      ),
+      _StepInfo(
+        icon: Icons.verified_rounded,
+        title: lp.t(S.kwathReady),
+        subtitle: 'Auto-Stop & Quality Verification',
+        detail: 'Machine auto-stops at the 1/4th endpoint. Optical sensor confirms extractive concentration yield. Ready for serving or dispensing.',
+        param1: 'Turbidity: Optimal Yield',
+        param2: 'AFI: Gold Standard',
+      ),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
     final ctrl = context.watch<IKwathController>();
+    final lp = context.watch<LocaleProvider>();
     final activeStep = (ctrl.stageIndex - 1).clamp(0, 4);
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    final steps = _buildSteps(lp);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
@@ -74,7 +76,7 @@ class StepperView extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'स्वायत्त क्वाथ निर्माण चक्र • Autonomous Extraction State Machine',
+                      lp.t(S.stepperTitle),
                       style: GoogleFonts.inter(
                         fontSize: 17,
                         fontWeight: FontWeight.w800,
@@ -83,7 +85,7 @@ class StepperView extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      '5-Stage Closed-Loop Sequence • AFI/API Pharmacopoeia Standard Compliance',
+                      lp.t(S.stepperSubtitle),
                       style: GoogleFonts.inter(
                         fontSize: 12,
                         color: isDark ? AppTheme.textMutedDark : AppTheme.textMutedLight,
@@ -101,7 +103,7 @@ class StepperView extends StatelessWidget {
                   border: Border.all(color: const Color(0xFFFFCC80)),
                 ),
                 child: Text(
-                  'चरण ${(activeStep + 1)} of 5 • ${_steps[activeStep].title}',
+                  'चरण ${(activeStep + 1)} of 5 • ${steps[activeStep].title}',
                   style: GoogleFonts.inter(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
@@ -121,7 +123,7 @@ class StepperView extends StatelessWidget {
 
           // ── Context Banner ────────────────────────────────────────────
           _ContextBanner(
-            step: _steps[activeStep],
+            step: steps[activeStep],
             ctrl: ctrl,
             activeStep: activeStep,
           ),
@@ -129,11 +131,11 @@ class StepperView extends StatelessWidget {
           const SizedBox(height: 22),
 
           // ── Step Cards (Vertical Detail) ──────────────────────────────
-          ...List.generate(_steps.length, (i) {
+          ...List.generate(steps.length, (i) {
             final isActive = i == activeStep;
             final isDone = i < activeStep;
             return _StepCard(
-              step: _steps[i],
+              step: steps[i],
               index: i,
               isActive: isActive,
               isDone: isDone,
@@ -201,42 +203,25 @@ class _HorizStepper extends StatelessWidget {
                           : Text(
                               '${i + 1}',
                               style: GoogleFonts.inter(
-                                fontSize: 15,
+                                fontSize: 16,
                                 fontWeight: FontWeight.w800,
                                 color: isActive
                                     ? Colors.white
-                                    : (isDark
-                                        ? AppTheme.textMutedDark
-                                        : AppTheme.textMutedLight),
+                                    : (isDark ? Colors.white54 : const Color(0xFF64748B)),
                               ),
                             ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      StepperView._steps[i].title,
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.inter(
-                        fontSize: 10.5,
-                        fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-                        color: isActive
-                            ? AppTheme.primary
-                            : isDone
-                                ? AppTheme.green
-                                : (isDark
-                                    ? AppTheme.textMutedDark
-                                    : AppTheme.textMutedLight),
-                      ),
                     ),
                   ],
                 ),
               ),
-              // Connector line
+              // Connector Line
               if (i < 4)
                 Expanded(
                   child: Container(
-                    height: 2.5,
-                    margin: const EdgeInsets.only(bottom: 24),
-                    color: i < activeStep ? AppTheme.primary : borderColor,
+                    height: 3,
+                    color: i < activeStep
+                        ? AppTheme.green
+                        : (isDark ? AppTheme.borderDark : AppTheme.borderLight),
                   ),
                 ),
             ],
@@ -263,135 +248,56 @@ class _ContextBanner extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
-      padding: const EdgeInsets.all(18),
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF142042) : const Color(0xFFFFF7ED),
+        color: isDark ? const Color(0xFF142042) : AppTheme.ayushBlueLight,
         borderRadius: BorderRadius.circular(12),
-        border: const Border(
-          left: BorderSide(color: AppTheme.primary, width: 4.5),
+        border: Border.all(
+          color: isDark ? AppTheme.borderDark : AppTheme.ayushBlueBorder,
         ),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: AppTheme.ayushBlue.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.info_outline_rounded,
+              color: AppTheme.ayushBlue,
+              size: 22,
+            ),
+          ),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  step.title,
+                  'चरण ${(activeStep + 1)} प्रचालन (Stage ${activeStep + 1} Operation)',
                   style: GoogleFonts.inter(
-                    fontSize: 16,
+                    fontSize: 12.5,
                     fontWeight: FontWeight.w800,
-                    color: AppTheme.primaryDark,
+                    color: AppTheme.ayushBlue,
                   ),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 4),
                 Text(
                   step.detail,
                   style: GoogleFonts.inter(
                     fontSize: 13,
-                    height: 1.5,
-                    color: isDark ? const Color(0xFFE2E8F0) : const Color(0xFF334155),
+                    height: 1.4,
+                    color: isDark ? Colors.white70 : const Color(0xFF334155),
                   ),
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    _ParamChip(step.param1),
-                    const SizedBox(width: 8),
-                    _ParamChip(step.param2),
-                  ],
                 ),
               ],
             ),
           ),
-          const SizedBox(width: 16),
-          Column(
-            children: [
-              if (activeStep == 2 || activeStep == 3)
-                FilledButton(
-                  onPressed: ctrl.togglePause,
-                  style: FilledButton.styleFrom(
-                    backgroundColor: ctrl.isPaused ? AppTheme.green : AppTheme.primary,
-                  ),
-                  child: Text(
-                    ctrl.isPaused ? 'Resume' : 'Pause',
-                    style: GoogleFonts.inter(fontWeight: FontWeight.w700),
-                  ),
-                ),
-              if (activeStep < 2)
-                FilledButton(
-                  onPressed: ctrl.startCycle,
-                  style: FilledButton.styleFrom(backgroundColor: AppTheme.primary),
-                  child: const Text('Start Extraction'),
-                ),
-              if (activeStep == 4)
-                FilledButton(
-                  onPressed: ctrl.resetNewBatch,
-                  style: FilledButton.styleFrom(backgroundColor: AppTheme.green),
-                  child: const Text('New Batch (नया बैच)'),
-                ),
-              const SizedBox(height: 8),
-              OutlinedButton(
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (_) => AlertDialog(
-                      title: const Text('Abort Kwatha Cycle?'),
-                      content: const Text(
-                        'This will stop the extraction cycle and return the ESP32 to IDLE state.',
-                      ),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: const Text('Cancel'),
-                        ),
-                        FilledButton(
-                          style: FilledButton.styleFrom(backgroundColor: AppTheme.red),
-                          onPressed: () {
-                            Navigator.pop(context);
-                            ctrl.triggerEmergencyCutoff();
-                          },
-                          child: const Text('Abort Cycle'),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: AppTheme.red,
-                  side: const BorderSide(color: AppTheme.red),
-                ),
-                child: const Text('Abort'),
-              ),
-            ],
-          ),
         ],
-      ),
-    );
-  }
-}
-
-class _ParamChip extends StatelessWidget {
-  final String label;
-  const _ParamChip(this.label);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: AppTheme.primary.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Text(
-        label,
-        style: GoogleFonts.inter(
-          fontSize: 11,
-          fontWeight: FontWeight.w700,
-          color: AppTheme.primaryDark,
-        ),
       ),
     );
   }
@@ -412,68 +318,123 @@ class _StepCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final accent = isDone
-        ? AppTheme.green
-        : isActive
-            ? AppTheme.primary
-            : (isDark ? AppTheme.textMutedDark : AppTheme.textMutedLight);
+    final borderColor = isDark ? AppTheme.borderDark : AppTheme.borderLight;
+    final textColor = isDark ? Colors.white : const Color(0xFF0F172A);
+    final mutedColor = isDark ? AppTheme.textMutedDark : AppTheme.textMutedLight;
 
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 250),
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: isActive
-            ? (isDark ? const Color(0xFF1B192A) : const Color(0xFFFFF9F5))
-            : cs.surface,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(
-          color: isActive
-              ? AppTheme.primary.withValues(alpha: 0.5)
-              : (isDark ? AppTheme.borderDark : AppTheme.borderLight),
-          width: isActive ? 1.5 : 1,
+    return AnimatedOpacity(
+      duration: const Duration(milliseconds: 300),
+      opacity: isActive || isDone ? 1.0 : 0.5,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        decoration: BoxDecoration(
+          color: isDark ? AppTheme.cardDark : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isActive ? AppTheme.primary : borderColor,
+            width: isActive ? 1.5 : 1.0,
+          ),
+          boxShadow: isActive
+              ? [
+                  BoxShadow(
+                    color: AppTheme.primary.withValues(alpha: 0.1),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  )
+                ]
+              : [],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              // Left Icon
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: isDone
+                      ? AppTheme.green.withValues(alpha: 0.15)
+                      : isActive
+                          ? AppTheme.primary.withValues(alpha: 0.15)
+                          : (isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9)),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  step.icon,
+                  color: isDone
+                      ? AppTheme.green
+                      : isActive
+                          ? AppTheme.primary
+                          : mutedColor,
+                ),
+              ),
+              const SizedBox(width: 16),
+              // Titles
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      step.title,
+                      style: GoogleFonts.inter(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: textColor,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      step.subtitle,
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        color: mutedColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // Right Parameters
+              if (isActive || isDone)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    _MiniParam(text: step.param1, color: AppTheme.ayushBlue),
+                    const SizedBox(height: 4),
+                    _MiniParam(text: step.param2, color: AppTheme.amber),
+                  ],
+                ),
+            ],
+          ),
         ),
       ),
-      child: Row(
-        children: [
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: accent.withValues(alpha: 0.12),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(step.icon, color: accent, size: 18),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  step.title,
-                  style: GoogleFonts.inter(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                    color: cs.onSurface,
-                  ),
-                ),
-                Text(
-                  step.subtitle,
-                  style: GoogleFonts.inter(fontSize: 11, color: accent),
-                ),
-              ],
-            ),
-          ),
-          if (isDone)
-            const Icon(Icons.check_circle_rounded,
-                color: AppTheme.green, size: 20),
-          if (isActive)
-            const Icon(Icons.play_circle_filled_rounded,
-                color: AppTheme.primary, size: 20),
-        ],
+    );
+  }
+}
+
+class _MiniParam extends StatelessWidget {
+  final String text;
+  final Color color;
+
+  const _MiniParam({required this.text, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
+      ),
+      child: Text(
+        text,
+        style: GoogleFonts.inter(
+          fontSize: 10,
+          fontWeight: FontWeight.w600,
+          color: color,
+        ),
       ),
     );
   }

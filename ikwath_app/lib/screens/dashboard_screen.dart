@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/ikwath_controller.dart';
+import '../services/locale_provider.dart';
+import '../l10n/app_strings.dart';
 import '../theme/app_theme.dart';
 import 'views/telemetry_view.dart';
 import 'views/stepper_view.dart';
@@ -164,6 +166,8 @@ class _AyushHeroStatusStrip extends StatelessWidget {
             );
           }
 
+          final lp = context.watch<LocaleProvider>();
+
           return Row(
             children: [
               // Ministry Mandate Tag
@@ -181,7 +185,7 @@ class _AyushHeroStatusStrip extends StatelessWidget {
                     const Icon(Icons.local_florist_rounded, size: 12, color: Colors.white),
                     const SizedBox(width: 4),
                     Text(
-                      'AFI मानक क्वाथ • AYUSH PHARMACOPOEIA',
+                      'AFI • ${lp.t(S.ayushPharma)}',
                       style: GoogleFonts.inter(
                         fontSize: 10,
                         fontWeight: FontWeight.w800,
@@ -200,7 +204,7 @@ class _AyushHeroStatusStrip extends StatelessWidget {
                 child: Row(
                   children: [
                     Text(
-                      'सक्रिय योग (Active Formulation): ',
+                      '${lp.t(S.activeFormulation)}: ',
                       style: GoogleFonts.inter(
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
@@ -229,19 +233,19 @@ class _AyushHeroStatusStrip extends StatelessWidget {
 
               // Telemetry Quick Stats in Header
               _MiniBadge(
-                label: 'PID तापमान',
+                label: lp.t(S.pidState),
                 val: '${t.tempC.toStringAsFixed(1)}°C',
                 color: t.isPidLocked ? AppTheme.green : AppTheme.amber,
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 10),
               _MiniBadge(
-                label: 'अवशेष द्रव्यमान',
+                label: lp.t(S.massReduction),
                 val: '${t.massG.toStringAsFixed(0)}g / ${t.targetMassG.toStringAsFixed(0)}g',
                 color: AppTheme.ayushBlue,
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 10),
               _MiniBadge(
-                label: '1/4th अपचयन',
+                label: lp.t(S.massReductionProgress),
                 val: '${(t.reductionProgress * 100).toStringAsFixed(0)}%',
                 color: AppTheme.primary,
               ),

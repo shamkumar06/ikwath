@@ -96,17 +96,14 @@ class _SplashScreenState extends State<SplashScreen>
                   scale: _scaleAnim,
                   child: Column(
                     children: [
-                      // Ashoka Lion Capital Golden Silhouette Card
+                      // Official Ministry of Ayush Logo Image
                       Container(
-                        width: 76,
-                        height: 82,
+                        width: 90,
+                        height: 90,
+                        padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.08),
+                          color: Colors.white,
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                            color: const Color(0xFFFFB74D).withValues(alpha: 0.4),
-                            width: 1.5,
-                          ),
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black.withValues(alpha: 0.4),
@@ -115,8 +112,12 @@ class _SplashScreenState extends State<SplashScreen>
                             ),
                           ],
                         ),
-                        child: const CustomPaint(
-                          painter: _SplashAshokaPainter(),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image.asset(
+                            'assets/images/ayush_logo.jpg',
+                            fit: BoxFit.contain,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 18),

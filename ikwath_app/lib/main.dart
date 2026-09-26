@@ -3,13 +3,17 @@ import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'theme/app_theme.dart';
 import 'services/ikwath_controller.dart';
+import 'services/locale_provider.dart';
 import 'screens/splash_screen.dart';
 
 void main() {
   GoogleFonts.config.allowRuntimeFetching = true;
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => IKwathController(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => IKwathController()),
+        ChangeNotifierProvider(create: (_) => LocaleProvider()),
+      ],
       child: const IKwathApp(),
     ),
   );
