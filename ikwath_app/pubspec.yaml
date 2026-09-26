@@ -36,3 +36,10 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/images/ayush_logo.jpg
+    - assets/images/sensor_temp.jpg
+    - assets/images/sensor_mass.jpg
+    - assets/images/sensor_stirrer.jpg
+    - assets/images/sensor_turbidity.jpg
+    - assets/images/sensor_boilover.jpg

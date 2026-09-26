@@ -323,21 +323,23 @@ class _AyushEmblemBrand extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // Ashoka Lion Capital Vector Emblem Box
+        // Official Ministry of Ayush Logo Image
         Container(
-          width: 44,
           height: 48,
+          constraints: const BoxConstraints(maxWidth: 160),
           decoration: BoxDecoration(
-            color: isDark ? const Color(0xFF1E2F5E) : const Color(0xFFFFF7ED),
+            color: isDark ? const Color(0xFF1E2F5E) : Colors.white,
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: isDark ? const Color(0xFF2A4387) : const Color(0xFFFFEDD5),
+              color: isDark ? const Color(0xFF2A4387) : const Color(0xFFE2E8F0),
             ),
           ),
-          child: CustomPaint(
-            painter: _AshokaEmblemPainter(
-              color: isDark ? const Color(0xFFFFB74D) : AppTheme.primaryDark,
-            ),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          child: Image.asset(
+            'assets/images/ayush_logo.jpg',
+            fit: BoxFit.contain,
+            color: isDark ? Colors.white : null,
+            colorBlendMode: isDark ? BlendMode.modulate : null,
           ),
         ),
 

@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../services/ikwath_controller.dart';
 import '../../theme/app_theme.dart';
 import '../../models/telemetry.dart';
+import '../widgets/vessel_diagram.dart';
 
 class TelemetryView extends StatelessWidget {
   const TelemetryView({super.key});
@@ -30,7 +31,12 @@ class TelemetryView extends StatelessWidget {
 
           const SizedBox(height: 22),
 
-          // ── 2. Sensor Card Grid Section Header ────────────────────────
+          // ── 2. Physical Prototype Architecture Cutaway Diagram ─────────
+          VesselDiagram(telemetry: t, isDark: isDark),
+
+          const SizedBox(height: 22),
+
+          // ── 3. Sensor Card Grid Section Header ────────────────────────
           const _SectionHeader(
             title: 'संवेदक ग्रिड • Real-Time Sensor Telemetry',
             subtitle: '6 calibrated sensors • ESP32 BLE Hardware Stream • 1 Hz sampling',
@@ -66,6 +72,7 @@ class TelemetryView extends StatelessWidget {
                     icon: Icons.thermostat_rounded,
                     actionLabel: 'PID Autotune',
                     onAction: () {},
+                    illustrationAsset: 'assets/images/sensor_temp.jpg',
                   ),
 
                   // 2. Mass / Reduction (HX711 Load Cell)
@@ -83,6 +90,7 @@ class TelemetryView extends StatelessWidget {
                     actionLabel: 'Tare Zero (शून्य)',
                     onAction: () {},
                     extraLabel: 'वाष्पीकरण: ${t.evapRateGpm.toStringAsFixed(1)} g/m',
+                    illustrationAsset: 'assets/images/sensor_mass.jpg',
                   ),
 
                   // 3. Magnetic Stirrer (Hall Effect)
@@ -98,6 +106,7 @@ class TelemetryView extends StatelessWidget {
                     icon: Icons.rotate_right_rounded,
                     actionLabel: 'Adjust Speed',
                     onAction: () {},
+                    illustrationAsset: 'assets/images/sensor_stirrer.jpg',
                   ),
 
                   // 4. Optical Yield / Turbidity (IR Nephelometric)
@@ -113,6 +122,7 @@ class TelemetryView extends StatelessWidget {
                     icon: Icons.opacity_rounded,
                     actionLabel: 'Yield Curve',
                     onAction: () {},
+                    illustrationAsset: 'assets/images/sensor_turbidity.jpg',
                   ),
 
                   // 5. Anti-Boilover Meniscus Clearance
@@ -128,6 +138,7 @@ class TelemetryView extends StatelessWidget {
                     icon: Icons.waves_rounded,
                     actionLabel: 'Foam Damping',
                     onAction: () {},
+                    illustrationAsset: 'assets/images/sensor_boilover.jpg',
                   ),
 
                   // 6. SSR Heater Power (Zero-Crossing PWM)
@@ -144,6 +155,7 @@ class TelemetryView extends StatelessWidget {
                     actionLabel: 'SSR Diagnostics',
                     onAction: () {},
                     extraLabel: '${t.powerWatts}W Firing',
+                    illustrationAsset: 'assets/images/sensor_temp.jpg',
                   ),
                 ],
               );
@@ -445,6 +457,7 @@ class SensorCard extends StatelessWidget {
   final String actionLabel;
   final VoidCallback onAction;
   final String? extraLabel;
+  final String? illustrationAsset;
 
   const SensorCard({
     super.key,
@@ -460,6 +473,7 @@ class SensorCard extends StatelessWidget {
     required this.actionLabel,
     required this.onAction,
     this.extraLabel,
+    this.illustrationAsset,
   });
 
   @override
@@ -476,156 +490,201 @@ class SensorCard extends StatelessWidget {
         border: Border.all(color: borderColor),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.03),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+            color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(11),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+        child: Stack(
           children: [
-            // Colored left accent strip
-            Container(width: 4.5, color: statusColor),
-            // Card content
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(13),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Title Row
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            color: statusColor.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(7),
-                          ),
-                          child: Icon(icon, size: 17, color: statusColor),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                title,
-                                style: GoogleFonts.inter(
-                                  fontSize: 12.5,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              Text(
-                                subtitle,
-                                style: GoogleFonts.inter(
-                                  fontSize: 10,
-                                  color: mutedColor,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ],
-                          ),
-                        ),
-                        // Tag pill
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 7,
-                            vertical: 3,
-                          ),
-                          decoration: BoxDecoration(
-                            color: statusColor.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(4),
-                            border: Border.all(
-                              color: statusColor.withValues(alpha: 0.25),
-                            ),
-                          ),
-                          child: Text(
-                            tag,
-                            style: GoogleFonts.inter(
-                              fontSize: 9,
-                              fontWeight: FontWeight.w800,
-                              color: statusColor,
-                              letterSpacing: 0.4,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 8),
-
-                    // Value Row
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.baseline,
-                      textBaseline: TextBaseline.alphabetic,
-                      children: [
-                        Text(
-                          value,
-                          style: GoogleFonts.inter(
-                            fontSize: 27,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: -1,
-                            color: cs.onSurface,
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          unit,
-                          style: GoogleFonts.inter(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: mutedColor,
-                          ),
-                        ),
-                        const Spacer(),
-                        if (extraLabel != null)
-                          Text(
-                            extraLabel!,
-                            style: GoogleFonts.inter(
-                              fontSize: 10.5,
-                              fontWeight: FontWeight.w600,
-                              color: AppTheme.primary,
-                            ),
-                          ),
-                      ],
-                    ),
-
-                    // Range label
-                    Text(
-                      rangeLabel,
-                      style: GoogleFonts.inter(
-                        fontSize: 10.5,
-                        color: mutedColor,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-
-                    const Spacer(),
-
-                    // Action button
-                    SizedBox(
-                      width: double.infinity,
-                      child: OutlinedButton(
-                        onPressed: onAction,
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 5),
-                          side: BorderSide(color: statusColor.withValues(alpha: 0.35)),
-                          textStyle: GoogleFonts.inter(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        child: Text(actionLabel),
-                      ),
-                    ),
-                  ],
+            // ── Background illustration image (right-side fade) ──
+            if (illustrationAsset != null)
+              Positioned(
+                right: 0,
+                top: 0,
+                bottom: 0,
+                width: 120,
+                child: ShaderMask(
+                  shaderCallback: (bounds) => LinearGradient(
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                    colors: [
+                      cs.surface,
+                      cs.surface.withValues(alpha: 0.0),
+                    ],
+                  ).createShader(bounds),
+                  blendMode: BlendMode.dstOut,
+                  child: Image.asset(
+                    illustrationAsset!,
+                    fit: BoxFit.cover,
+                    opacity: const AlwaysStoppedAnimation(0.35),
+                  ),
                 ),
               ),
+
+            // ── Foreground card content ──
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Colored left accent strip
+                Container(width: 4.5, color: statusColor),
+                // Card content
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(13),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Title Row
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: statusColor.withValues(alpha: 0.14),
+                                borderRadius: BorderRadius.circular(7),
+                              ),
+                              child: Icon(icon, size: 17, color: statusColor),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    title,
+                                    style: GoogleFonts.inter(
+                                      fontSize: 12.5,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  Text(
+                                    subtitle,
+                                    style: GoogleFonts.inter(
+                                      fontSize: 10,
+                                      color: mutedColor,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            // Tag pill
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 7,
+                                vertical: 3,
+                              ),
+                              decoration: BoxDecoration(
+                                color: statusColor.withValues(alpha: 0.13),
+                                borderRadius: BorderRadius.circular(4),
+                                border: Border.all(
+                                  color: statusColor.withValues(alpha: 0.28),
+                                ),
+                              ),
+                              child: Text(
+                                tag,
+                                style: GoogleFonts.inter(
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.w800,
+                                  color: statusColor,
+                                  letterSpacing: 0.4,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 8),
+
+                        // Value Row
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.baseline,
+                          textBaseline: TextBaseline.alphabetic,
+                          children: [
+                            Text(
+                              value,
+                              style: GoogleFonts.inter(
+                                fontSize: 27,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: -1,
+                                color: cs.onSurface,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              unit,
+                              style: GoogleFonts.inter(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: mutedColor,
+                              ),
+                            ),
+                            const Spacer(),
+                            if (extraLabel != null)
+                              Text(
+                                extraLabel!,
+                                style: GoogleFonts.inter(
+                                  fontSize: 10.5,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppTheme.primary,
+                                ),
+                              ),
+                          ],
+                        ),
+
+                        // Range label
+                        Text(
+                          rangeLabel,
+                          style: GoogleFonts.inter(
+                            fontSize: 10.5,
+                            color: mutedColor,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+
+                        const Spacer(),
+
+                        // Progress bar
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(4),
+                          child: SizedBox(
+                            height: 4,
+                            child: LinearProgressIndicator(
+                              value: progress,
+                              backgroundColor: statusColor.withValues(alpha: 0.12),
+                              valueColor: AlwaysStoppedAnimation<Color>(statusColor),
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 8),
+
+                        // Action button
+                        SizedBox(
+                          width: double.infinity,
+                          child: OutlinedButton(
+                            onPressed: onAction,
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 5),
+                              side: BorderSide(color: statusColor.withValues(alpha: 0.35)),
+                              textStyle: GoogleFonts.inter(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            child: Text(actionLabel),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
