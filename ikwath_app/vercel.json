@@ -1,6 +1,6 @@
 {
   "buildCommand": "echo 'Skipping Vercel build, using local pre-built Flutter web files'",
-  "outputDirectory": "ikwath_app/build/web",
+  "outputDirectory": "build/web",
   "cleanUrls": true,
   "rewrites": [
     {
