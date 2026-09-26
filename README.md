@@ -23,13 +23,3 @@ This repository contains the Flutter Web Dashboard for monitoring the ESP32 hard
 - **Dynamic Physical Cutaway View** (Live hardware state mirroring)
 
 ---
-
-## 🛠️ Local Development
-
-To run this dashboard locally:
-
-```bash
-cd ikwath_app
-flutter pub get
-flutter run -d web-server --web-port=8080
-```
