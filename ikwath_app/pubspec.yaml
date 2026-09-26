@@ -1,0 +1,38 @@
+name: ikwath_dashboard
+description: "iKwath - Smart Pod-Based Ayurvedic Decoction Platform | Team SAMADHANA | SIH 2026"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.13.3
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  
+  # State Management
+  provider: ^6.1.2
+  
+  # Charts & Visualizations
+  fl_chart: ^0.70.2
+  
+  # BLE Hardware Communication (ESP32)
+  flutter_blue_plus: ^1.35.3
+  
+  # Persistence
+  shared_preferences: ^2.3.3
+  
+  # Typography
+  google_fonts: ^6.2.1
+  
+  # Date/Time Formatting
+  intl: ^0.19.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
