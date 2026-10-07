@@ -3,7 +3,7 @@
 [![Vercel Deployment](https://img.shields.io/badge/Vercel-Deployed-000000?style=for-the-badge&logo=vercel)](https://ikwath-nine.vercel.app/)
 
 ### 🚀 Live Demo: [https://ikwath-nine.vercel.app/](https://ikwath-nine.vercel.app/)
-### 🚀 For diagrammatic representation : [https://ikwath-nine.vercel.app/](https://ikwath-nine.vercel.app/)
+### 🚀 For diagrammatic representation : [[click here](https://gitdiagram.com/shamkumar06/ikwath/tree/main))
 
 **iKwath** is a pod-based smart Kwatha (Kadha) maker that prepares a fresh, **AFI/API-standardized decoction** from coarse powder (Yavakūṭa Cūrṇa) on demand, in the shortest practical time without altering the decoction's quality or yield.
 
